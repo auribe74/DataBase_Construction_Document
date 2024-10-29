@@ -1,0 +1,137 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document Search</title>
+
+    <!-- Incluir Bootstrap -->
+    <link href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" rel="stylesheet">
+    
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 20px;
+            background-color: #f8f9fa;
+        }
+
+        h1 {
+            font-size: 28px;
+            font-weight: bold;
+        }
+
+        .container {
+            margin-top: 50px;
+        }
+
+        .search-box {
+            padding: 20px;
+            background-color: #ffffff;
+            border-radius: 10px;
+            box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.1);
+        }
+
+        .results {
+            margin-top: 20px;
+        }
+
+        .result-item {
+            padding: 10px;
+            background-color: #ffffff;
+            border: 1px solid #e0e0e0;
+            border-radius: 5px;
+            margin-bottom: 10px;
+        }
+
+        .pagination {
+            margin-top: 20px;
+        }
+
+        .history {
+            margin-top: 30px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1 class="text-center">Document Search</h1>
+
+        <!-- Formulario de búsqueda -->
+        <div class="search-box">
+            <form method="GET" action="/search" class="form-inline justify-content-center">
+                <input type="text" name="query" class="form-control mr-sm-2" placeholder="Search for documents..." value="{{ query }}" required>
+                <button type="submit" class="btn btn-primary">Search</button>
+
+                <!-- Filtros adicionales -->
+                <div class="form-group mx-sm-3">
+                    <label for="file_type" class="mr-sm-2">File Type:</label>
+                    <select name="file_type" id="file_type" class="form-control">
+                        <option value="all">All</option>
+                        <option value="pdf">PDF</option>
+                        <option value="word">Word</option>
+                    </select>
+                </div>
+
+                <div class="form-group mx-sm-3">
+                    <label for="date_filter" class="mr-sm-2">Modified:</label>
+                    <select name="date_filter" id="date_filter" class="form-control">
+                        <option value="all">Any Time</option>
+                        <option value="7days">Last 7 Days</option>
+                        <option value="30days">Last 30 Days</option>
+                    </select>
+                </div>
+            </form>
+        </div>
+
+        <!-- Resultados de búsqueda -->
+        {% if results %}
+            <div class="results">
+                <h2>{{ total_results }} results found:</h2>
+                <ul class="list-unstyled">
+                    {% for result in results %}
+                        <li class="result-item">
+                            <a href="{{ url_for('download', filename=result['path']) }}">{{ result['name'] }}</a>
+                            (ubicado en {{ result['full_path'] }})
+                        </li>
+                    {% endfor %}
+                </ul>
+            </div>
+
+            <!-- Paginación -->
+            <nav aria-label="Search results pages">
+                <ul class="pagination justify-content-center">
+                    {% if page > 1 %}
+                        <li class="page-item">
+                            <a class="page-link" href="{{ url_for('search', query=query, file_type=file_type, date_filter=date_filter, page=page-1) }}">Previous</a>
+                        </li>
+                    {% endif %}
+                    {% if total_results > page * results_per_page %}
+                        <li class="page-item">
+                            <a class="page-link" href="{{ url_for('search', query=query, file_type=file_type, date_filter=date_filter, page=page+1) }}">Next</a>
+                        </li>
+                    {% endif %}
+                </ul>
+            </nav>
+        {% elif message %}
+            <div class="alert alert-info">{{ message }}</div>
+        {% endif %}
+
+        <!-- Historial de búsqueda -->
+        {% if history %}
+            <div class="history">
+                <h2>Search History:</h2>
+                <ul class="list-unstyled">
+                    {% for search in history %}
+                        <li>{{ search }}</li>
+                    {% endfor %}
+                </ul>
+            </div>
+        {% endif %}
+    </div>
+
+    <!-- Incluir Bootstrap JS y dependencias -->
+    <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.5.2/dist/umd/popper.min.js"></script>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+</body>
+</html>
