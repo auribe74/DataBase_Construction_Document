@@ -1,0 +1,1 @@
+-e "# Ignora el entorno virtual\nvenv/\n__pycache__/\n*.pyc" 
