@@ -6,8 +6,8 @@ import time
 
 app = Flask(__name__)
 
-# Ruta a la carpeta de documentos
-DOCUMENTS_FOLDER = r'C:\Users\aurib\OneDrive\Documentos\Proyectos Personales\BOT AI\Application_Documents_Folder'
+# Ruta a la carpeta de documentos dentro de la carpeta 'static'
+DOCUMENTS_FOLDER = os.path.join(os.getcwd(), 'static', 'documents')
 RESULTS_PER_PAGE = 10  # Número de resultados por página
 search_history = []  # Variable global para almacenar el historial
 
@@ -124,6 +124,6 @@ def download(filename):
     return send_from_directory(DOCUMENTS_FOLDER, filename, as_attachment=True)
 
 if __name__ == '__main__':
-    # En Heroku, usamos la variable de entorno PORT para el puerto dinámico
+    # En Heroku o Render, usamos la variable de entorno PORT para el puerto dinámico
     port = int(os.environ.get('PORT', 5000))
     app.run(host='0.0.0.0', port=port, debug=True)
