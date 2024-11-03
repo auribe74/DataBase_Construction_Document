@@ -4,14 +4,9 @@ from PyPDF2 import PdfReader
 import docx
 import time
 
-# Código de depuración
-print("Directorio actual:", os.getcwd())
-print("Contenido de 'templates':", os.listdir(os.path.join(os.getcwd(), 'templates')))
-
 app = Flask(__name__)
 
-# Configuración de la ruta a la carpeta de documentos
-# Usamos os.path.join para una mejor compatibilidad en sistemas operativos
+# Ruta a la carpeta de documentos
 DOCUMENTS_FOLDER = os.path.join(os.getcwd(), 'static', 'documents')
 RESULTS_PER_PAGE = 10  # Número de resultados por página
 search_history = []  # Variable global para almacenar el historial
@@ -38,20 +33,21 @@ def search():
     all_results = search_documents(query, file_type, date_filter)
     total_results = len(all_results)
 
+    # Ordenar resultados alfabéticamente por el nombre del archivo
+    all_results.sort(key=lambda x: x['name'])
+
     # Obtener los resultados para la página actual
     start = (page - 1) * RESULTS_PER_PAGE
     end = start + RESULTS_PER_PAGE
     paginated_results = all_results[start:end]
 
-    return render_template(
-        'index.html',
-        results=paginated_results,
-        query=query,
-        page=page,
-        total_results=total_results,
-        results_per_page=RESULTS_PER_PAGE,
-        history=search_history
-    )
+    return render_template('index.html', 
+                           results=paginated_results, 
+                           query=query, 
+                           page=page, 
+                           total_results=total_results,
+                           results_per_page=RESULTS_PER_PAGE,
+                           history=search_history)
 
 def search_documents(query, file_type, date_filter):
     results = []
@@ -114,6 +110,10 @@ def search_docx(docx_path, query):
     return False
 
 def match_query(text, query):
+    # Permite búsqueda de frases exactas
+    if '"' in query:
+        phrase = query.strip('"')
+        return phrase.lower() in text.lower()
     # Revisar si el query incluye operadores AND o OR
     if 'AND' in query:
         terms = [term.strip() for term in query.split('AND')]
@@ -131,6 +131,6 @@ def download(filename):
     return send_from_directory(DOCUMENTS_FOLDER, filename, as_attachment=True)
 
 if __name__ == '__main__':
-    # En Render o Heroku, usamos la variable de entorno PORT para el puerto dinámico
+    # En Render, usamos la variable de entorno PORT para el puerto dinámico
     port = int(os.environ.get('PORT', 5000))
     app.run(host='0.0.0.0', port=port, debug=True)
