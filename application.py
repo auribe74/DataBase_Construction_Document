@@ -4,9 +4,14 @@ from PyPDF2 import PdfReader
 import docx
 import time
 
+# Código de depuración
+print("Directorio actual:", os.getcwd())
+print("Contenido de 'templates':", os.listdir(os.path.join(os.getcwd(), 'templates')))
+
 app = Flask(__name__)
 
-# Ruta a la carpeta de documentos dentro de la carpeta 'static'
+# Configuración de la ruta a la carpeta de documentos
+# Usamos os.path.join para una mejor compatibilidad en sistemas operativos
 DOCUMENTS_FOLDER = os.path.join(os.getcwd(), 'static', 'documents')
 RESULTS_PER_PAGE = 10  # Número de resultados por página
 search_history = []  # Variable global para almacenar el historial
@@ -38,13 +43,15 @@ def search():
     end = start + RESULTS_PER_PAGE
     paginated_results = all_results[start:end]
 
-    return render_template('index.html', 
-                           results=paginated_results, 
-                           query=query, 
-                           page=page, 
-                           total_results=total_results,
-                           results_per_page=RESULTS_PER_PAGE,
-                           history=search_history)
+    return render_template(
+        'index.html',
+        results=paginated_results,
+        query=query,
+        page=page,
+        total_results=total_results,
+        results_per_page=RESULTS_PER_PAGE,
+        history=search_history
+    )
 
 def search_documents(query, file_type, date_filter):
     results = []
@@ -124,6 +131,6 @@ def download(filename):
     return send_from_directory(DOCUMENTS_FOLDER, filename, as_attachment=True)
 
 if __name__ == '__main__':
-    # En Heroku o Render, usamos la variable de entorno PORT para el puerto dinámico
+    # En Render o Heroku, usamos la variable de entorno PORT para el puerto dinámico
     port = int(os.environ.get('PORT', 5000))
     app.run(host='0.0.0.0', port=port, debug=True)
